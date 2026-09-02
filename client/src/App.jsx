@@ -14,6 +14,7 @@ import PostDetailPage from './pages/PostDetailPage'
 import ChatPage from './pages/ChatPage'
 import MessagesPage from './pages/MessagesPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import AttendancePlannerPage from './pages/AttendancePlannerPage'
 import PWANotificationPrompt from './components/PWANotificationPrompt'
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
           <Route path="/sendiyou/post/:postId" element={<ProtectedRoute><PostDetailPage /></ProtectedRoute>} />
           <Route path="/chat/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+          <Route path="/attendance" element={<ProtectedRoute><AttendancePlannerPage /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </main>

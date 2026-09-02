@@ -73,7 +73,6 @@ export default function FinderPage() {
     // Set Day (MON-SAT, fallback to MON if Sunday)
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
     let currentDay = days[now.getDay()]
-    if (currentDay === 'SUN') currentDay = 'MON'
     setSelectedDay(currentDay)
 
     // Set Time (HH:MM)
@@ -176,7 +175,7 @@ export default function FinderPage() {
             {!error && (
               <>
                 {/* Summary Bar */}
-                {roomsData && !loading && (
+                {roomsData && !loading && selectedDay !== 'SUN' && (
                   <div className="flex flex-wrap items-center gap-4 mb-8">
                     <h2 className="text-xl font-bold font-heading text-text-primary mr-auto">
                       Building {selectedBuilding} Rooms
@@ -211,7 +210,21 @@ export default function FinderPage() {
 
                 {/* Results Grid */}
                 {!loading && !error && roomsData && (
-                  roomsData.rooms.length > 0 ? (
+                  selectedDay === 'SUN' ? (
+                    <div className="text-center py-20 glass-card animate-in fade-in slide-in-from-bottom-4 duration-500 border border-violet-primary/20 bg-violet-primary/5">
+                      <div className="text-6xl mx-auto mb-4">🏖️</div>
+                      <h3 className="text-2xl font-bold font-heading text-text-primary mb-2">Today is a Holiday!</h3>
+                      <p className="text-text-muted text-lg mb-6">Take a break, relax, and enjoy your Sunday. No classes today.</p>
+                      
+                      <div className="bg-slate-darker/80 border border-violet-primary/30 p-6 rounded-2xl max-w-sm mx-auto shadow-lg">
+                        <h4 className="text-text-primary font-semibold mb-2">Got some free time?</h4>
+                        <p className="text-sm text-text-muted mb-4">Check out <span className="font-bold text-violet-primary">SendiYou</span> to connect with campus folks anonymously!</p>
+                        <a href="/sendiyou" className="inline-block px-6 py-2.5 bg-violet-primary hover:bg-violet-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-md shadow-violet-primary/20 hover:-translate-y-0.5">
+                          Explore SendiYou ✨
+                        </a>
+                      </div>
+                    </div>
+                  ) : roomsData.rooms.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start animate-in fade-in slide-in-from-bottom-4 duration-500">
                       {roomsData.rooms.map((room) => (
                         <RoomCard 

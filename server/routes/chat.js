@@ -3,15 +3,29 @@ const { createClient } = require('@supabase/supabase-js');
 const { GoogleGenAI } = require('@google/genai');
 const timetableRouter = require('./timetable');
 const applyOrientationOverrides = timetableRouter.applyOrientationOverrides;
+const { computeRequiredAndSafe } = require('./attendance');
 
 const router = express.Router();
 
 let supabase;
-function getSupabase() {
+function getSupabase(token) {
+  if (token) {
+    return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, {
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
+  }
   if (!supabase) {
     supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
   }
   return supabase;
+}
+
+function extractToken(req) {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.split(' ')[1];
+  }
+  return null;
 }
 
 let ai;
@@ -23,7 +37,7 @@ function getAI() {
 }
 
 const SYSTEM_PROMPT = `
-You are Timbel's AI Assistant, helping students with their college timetable.
+You are Timbel's AI Assistant, helping students with their college timetable and attendance tracking.
 LANGUAGE RULES:
 - You must carefully observe the language the user is speaking.
 - If the user speaks in English, you MUST reply entirely in English.
@@ -39,6 +53,22 @@ DATABASE QUERYING:
 - When a user asks about specific classes, free rooms, or teacher schedules, you MUST use the 'searchTimetable' tool to find the information in the database.
 - DO NOT reveal raw JSON, arrays, or database structure to the user.
 - Answer in a short, meaningful, and natural human-readable way.
+
+FORMATTING & TONE:
+- NEVER use Markdown formatting (NO **bold**, NO *italics*, NO # headings, NO bullet points). Your output must be 100% plain text.
+- Keep your answers extremely SHORT, casual, and punchy. Maximum 2 sentences unless absolutely necessary.
+- Use a friendly, conversational tone (like a college friend).
+
+ATTENDANCE QUERIES:
+- If the user asks how many classes they can skip ("bunk") or asks any questions regarding their attendance, check the STUDENT ATTENDANCE CONTEXT provided below.
+- Do NOT refuse to answer attendance questions. You are now equipped to answer them!
+- Use the calculated "Safety Buffer" or "safe bunks" numbers provided in the context to give them specific numbers (e.g., "Aap Maths ke 2 lectures safe-ly bunk kar sakte hain!").
+- CUSTOM CRITERIA QUERIES: If the student asks what happens with a different attendance criteria (e.g., "Agar 80% criteria ho toh?", "65% ke hisaab se batao"), dynamically calculate using their present/absent numbers:
+  * total = present + absent
+  * safe_bunks = Math.floor(present / (criteria/100) - total) (if > 0, else 0)
+  * required_to_attend = Math.ceil(((criteria/100) * total - present) / (1 - criteria/100)) (if > 0, else 0)
+  Explain the result simply and clearly for their hypothetical criteria.
+- MANDATORY LAST-UPDATED NOTICE: Whenever you answer any attendance-related question, you MUST end your response by reminding the student when their attendance data was last updated (e.g., "📌 Note: Yeh calculation aapke [Last Updated Date/Time] tak ke update kiye gaye attendance data ke base par hai.").
 
 ISSUE REPORTING:
 - If the user reports a mistake in the timetable or a problem, apologize and tell them to use the "Report Issue" button in the chat interface to submit a structured report.
@@ -68,14 +98,15 @@ const searchTimetableDeclaration = {
 
 router.post('/ask', async (req, res) => {
   try {
-    const { message, history } = req.body;
+    const { message, history, user_id } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
+    const token = extractToken(req);
     const aiClient = getAI();
-    const db = getSupabase();
+    const db = getSupabase(token);
     
     // Construct conversation context
     const contents = [];
@@ -97,14 +128,88 @@ router.post('/ask', async (req, res) => {
     const now = new Date();
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const currentDayStr = days[now.getDay()];
+
+    let targetUserId = user_id;
+    if (!targetUserId && token) {
+      try {
+        const { data: userData } = await db.auth.getUser(token);
+        if (userData?.user?.id) targetUserId = userData.user.id;
+      } catch (authErr) {
+        console.error('[Chat API] Failed to extract user from token:', authErr.message);
+      }
+    }
+
+    let attendanceContext = '';
+    if (targetUserId) {
+      const { data: attendanceData, error: attError } = await db
+        .from('student_attendance')
+        .select('*')
+        .eq('user_id', targetUserId);
+      
+      console.log(`[Chat API] Attendance lookup for user ${targetUserId}:`, {
+        found: attendanceData?.length || 0,
+        error: attError?.message || null,
+        hasToken: !!token
+      });
+      
+      if (!attError && attendanceData && attendanceData.length > 0) {
+        let latestUpdated = null;
+        attendanceData.forEach(r => {
+          if (r.last_updated) {
+            const dt = new Date(r.last_updated);
+            if (!latestUpdated || dt > latestUpdated) {
+              latestUpdated = dt;
+            }
+          }
+        });
+
+        const formattedLastUpdated = latestUpdated
+          ? latestUpdated.toLocaleDateString('en-IN', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+          : 'recently';
+
+        attendanceContext = '\nSTUDENT ATTENDANCE CONTEXT:\n';
+        attendanceContext += `Data Last Updated by Student: ${formattedLastUpdated}\n`;
+        attendanceContext += 'The user is asking about their attendance or bunking limits. Here is their current status:\n';
+        
+        attendanceData.forEach(record => {
+          const stats = computeRequiredAndSafe(record);
+          const subjName = record.subject || record.subject_name || 'Subject';
+          const present = record.present || 0;
+          const absent = record.absent || 0;
+          const total = present + absent;
+          const pct = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+          
+          attendanceContext += `- ${subjName}: ${pct}% (Present: ${present}, Absent: ${absent}). Status: ${stats.status}. `;
+          if (stats.safeBunks > 0) {
+            attendanceContext += `Safety Buffer: They can safely skip ${stats.safeBunks} more classes without falling below threshold.\n`;
+          } else if (stats.requiredToAttend > 0) {
+            attendanceContext += `Detention Risk: They MUST attend ${stats.requiredToAttend} consecutive classes to reach safe percentage.\n`;
+          } else {
+            attendanceContext += `Borderline: They are exactly at the threshold. Cannot miss any class.\n`;
+          }
+        });
+        attendanceContext += `IMPORTANT: When answering, give clear subject-wise breakdown if relevant. At the very end of your response, ALWAYS include a note stating that this advice is based on data updated up to: ${formattedLastUpdated}.\n`;
+      } else {
+        attendanceContext = '\nSTUDENT ATTENDANCE CONTEXT:\nThe student is logged in, but has not entered or saved any attendance records in the Attendance Planner yet. If they ask about attendance or how many classes they can skip, politely guide them to first update their attendance in the "Attendance Planner" page so you can calculate their safety buffer.\n';
+      }
+    } else {
+      attendanceContext = '\nSTUDENT ATTENDANCE CONTEXT:\nUser is not logged in. If they ask about their attendance or bunking, politely advise them to log in to Timbel so you can access their attendance planner.\n';
+    }
     
     const dynamicSystemPrompt = `${SYSTEM_PROMPT}
 
 CURRENT CONTEXT:
 - Today is: ${currentDayStr}
 - College standard slots are: 08:00-08:55, 08:55-09:50, 09:50-10:45, 10:45-11:40, 12:35-13:30, 13:30-14:25, 14:25-15:20.
-- If the user asks when a room is free today, figure out today's day from the context above, query the database for that day, compare the database results against the standard slots, and report which standard slots are empty.
+- If the user asks when a room is free today, figure out today's day from the context above, query the database for that day, compare the database results against the standard slots, and report which standard slots are empty.${attendanceContext}
 `;
+
 
     const config = {
       systemInstruction: dynamicSystemPrompt,

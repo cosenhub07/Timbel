@@ -13,6 +13,7 @@ const featureLinks = [
   { name: 'Find Rooms', path: '/finder' },
   { name: 'Class Timetables', path: '/classes' },
   { name: 'Teacher Status', path: '/teachers' },
+  { name: 'Attendance 📊', path: '/attendance' },
   { name: 'SendiYou 💌', path: '/sendiyou' },
   { name: 'Messages 💬', path: '/messages' }
 ]

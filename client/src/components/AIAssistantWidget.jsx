@@ -4,6 +4,7 @@ import LottieLib from 'lottie-react';
 import assistantAnimation from '../assets/assistent.json';
 import loaderAnimation from '../assets/loder.json';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../supabaseClient';
 
 const Lottie = LottieLib.default || LottieLib;
 
@@ -15,6 +16,8 @@ export default function AIAssistantWidget() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  
+  const { user } = useAuth();
 
   // Structured Issue Form State
   const [showIssueForm, setShowIssueForm] = useState(false);
@@ -45,14 +48,24 @@ export default function AIAssistantWidget() {
     setIsLoading(true);
 
     try {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const token = currentSession?.access_token;
+      const effectiveUserId = user?.id || currentSession?.user?.id;
+
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/chat/ask', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers,
         body: JSON.stringify({
           message: userMessage,
-          history: messages.slice(-10) // Send last 10 messages as context
+          history: messages.slice(-10), // Send last 10 messages as context
+          user_id: effectiveUserId
         })
       });
 
@@ -106,8 +119,6 @@ export default function AIAssistantWidget() {
       setIssueSubmitting(false);
     }
   };
-
-  const { user } = useAuth();
   const isUniUser = user && user.email && (user.email.endsWith('.ac.in') || user.email.endsWith('.edu') || user.email.endsWith('.edu.in'));
 
   return (

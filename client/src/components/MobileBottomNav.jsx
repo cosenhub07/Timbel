@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Search, Calendar, Plus, Users, Heart } from 'lucide-react'
+import { Search, Calendar, Plus, Users, Heart, BarChart2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { isUniversityEmail } from '../utils/authUtils'
 
@@ -69,11 +69,11 @@ export default function MobileBottomNav() {
           </span>
         </div>
 
-        {/* Teacher Status */}
-        <Link to="/teachers" className="flex flex-col items-center justify-center w-16 gap-1 group ml-4">
-          <Users size={22} className={isActive('/teachers') ? 'text-violet-primary' : 'text-text-muted group-hover:text-text-secondary transition-colors'} />
-          <span className={`text-[10px] font-medium ${isActive('/teachers') ? 'text-violet-primary' : 'text-text-muted'}`}>
-            Teachers
+        {/* Attendance Planner */}
+        <Link to="/attendance" className="flex flex-col items-center justify-center w-16 gap-1 group ml-4">
+          <BarChart2 size={22} className={isActive('/attendance') ? 'text-violet-primary' : 'text-text-muted group-hover:text-text-secondary transition-colors'} />
+          <span className={`text-[10px] font-medium ${isActive('/attendance') ? 'text-violet-primary' : 'text-text-muted'}`}>
+            Attendance
           </span>
         </Link>
 
