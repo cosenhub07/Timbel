@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { Calendar, Clock, User, MapPin, Search } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Calendar, Clock, User, MapPin, Search, GraduationCap, ArrowRight } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import QuantumBackground from '../components/QuantumBackground'
 import LottieLib from 'lottie-react'
@@ -133,6 +134,32 @@ export default function ClassTimetablePage() {
               Select your class code below to instantly view your entire weekly schedule, including subjects, rooms, and teachers.
             </p>
           </div>
+        </div>
+
+        {/* Link to Teacher Status Section */}
+        <div className="w-full max-w-md flex justify-center -mt-6 mb-8 relative z-20">
+          <Link
+            to="/teachers"
+            className="group flex items-center justify-between gap-4 px-5 py-3 rounded-2xl glass-card border border-violet-primary/30 bg-gradient-to-r from-violet-primary/10 via-slate-card/80 to-transparent hover:border-violet-primary/60 hover:bg-violet-primary/15 transition-all duration-300 shadow-[0_4px_20px_rgba(99,91,255,0.15)] hover:shadow-[0_4px_25px_rgba(99,91,255,0.25)] hover:scale-[1.02] w-full"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-violet-primary/20 border border-violet-primary/30 flex items-center justify-center text-violet-primary group-hover:scale-110 transition-transform">
+                <GraduationCap size={20} />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-bold text-text-primary group-hover:text-violet-primary transition-colors flex items-center gap-1.5">
+                  Looking for a Teacher?
+                </p>
+                <p className="text-xs text-text-muted">
+                  Check live teacher availability & lecture schedule
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 text-xs font-bold text-violet-primary bg-violet-primary/10 px-3 py-1.5 rounded-xl border border-violet-primary/20 group-hover:bg-violet-primary group-hover:text-white transition-all flex-shrink-0">
+              <span>View</span>
+              <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
         </div>
 
         {/* Dropdown Section */}
