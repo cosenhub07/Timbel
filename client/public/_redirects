@@ -1,3 +1,7 @@
+# Netlify API proxy to Render backend
+/api/*    https://timbel-api.onrender.com/api/:splat    200!
+
 # Netlify SPA redirect rule
 /*    /index.html   200
+
 
