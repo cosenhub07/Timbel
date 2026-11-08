@@ -6,3 +6,5 @@ dist
 .agents
 client/node_modules
 server/node_modules
+.netlify
+
