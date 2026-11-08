@@ -15,6 +15,7 @@ import {
 import cosenLogo from '../assets/cosen_brand_logo2.svg'
 import Hero3D from '../components/Hero3D'
 import PixelBlast from '../components/PixelBlast'
+import ParticleText from '../components/ParticleText'
 import ContributorsMarquee from '../components/ContributorsMarquee'
 import PushNotificationManager from '../components/PushNotificationManager'
 import CampusLoginModal from '../components/CampusLoginModal'
@@ -548,6 +549,24 @@ export default function LandingPage() {
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [isStandalone, setIsStandalone] = useState(false)
 
+  // Smart scroll tracking for ParticleText ambient background
+  const [scrollY, setScrollY] = useState(0)
+
+  useEffect(() => {
+    let ticking = false
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrollY(window.scrollY)
+          ticking = false
+        })
+        ticking = true
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   useEffect(() => {
     setTimeout(() => setReady(true), 100)
 
@@ -641,6 +660,42 @@ export default function LandingPage() {
           style={{ pointerEvents: 'auto' }}
         />
       </div>
+
+      {/* ── 🌌 Compact Top Interactive ParticleText Bar ── */}
+      <section style={{
+        position: 'relative',
+        zIndex: 5,
+        width: '100%',
+        height: 95,
+        minHeight: 75,
+        marginTop: 64, // Clears fixed Navbar (h-16) so it is never hidden or overlapped
+        background: 'radial-gradient(ellipse 60% 80% at 50% 50%, rgba(99,91,255,0.1) 0%, rgba(6,12,32,0.7) 100%)',
+        borderBottom: '1px solid rgba(99,91,255,0.18)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+      }}>
+        <ParticleText
+          text="TIMBEL"
+          particleSize={2.0}
+          density={2.4}
+          color="#ffffff"
+          highlightColor="#818cf8"
+          scatter={60}
+          gatherDuration={1000}
+          stagger={160}
+          pointerRepel={28}
+          repelRadius={70}
+          idleDrift={0.35}
+          trigger="hover"
+          fontSize="clamp(1.8rem, 4.5vw, 2.8rem)"
+          fontWeight={800}
+          fontFamily="'Inter', -apple-system, sans-serif"
+          glow={false}
+          style={{ width: '100%', height: '100%', cursor: 'pointer' }}
+        />
+      </section>
       
       <Hero3D onLoginClick={() => setIsLoginModalOpen(true)} onDownloadClick={handleInstallClick} />
 

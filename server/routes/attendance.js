@@ -77,8 +77,8 @@ function computeRequiredAndSafe(record) {
   const total = present + absent;
   const num = reqPct * total - present;
   const den = 1 - reqPct;
-  const requiredToAttend = num > 0 ? Math.ceil(num / den) : 0;
-  const maxAbs = Math.floor(present / reqPct - total);
+  const requiredToAttend = num > 1e-9 ? Math.ceil(num / den) : 0;
+  const maxAbs = Math.floor((present / reqPct) - total + 1e-9);
   const safeBunks = maxAbs > 0 ? maxAbs : 0;
   const status = requiredToAttend > 0 ? 'DANGER' : (safeBunks <= 2 ? 'WARNING' : 'SAFE');
   return { requiredToAttend, safeBunks, status };
@@ -534,7 +534,7 @@ router.post('/ai-advisor', async (req, res) => {
     const aiClient = getAI();
     
     const subjectSummaries = dashboardData.subjects.map(s => {
-      let line = `- ${s.subject}: ${s.stats?.current?.toFixed(1)}% (Target: ${s.required_percentage}%). `;
+      let line = `- ${s.subject}: ${s.stats?.current?.toFixed(2)}% (Target: ${s.required_percentage}%). `;
       if (s.status === 'DANGER') {
         line += `Needs ${s.requiredToAttend} more lectures. `;
         if (s.projection?.recoveryDate) {
@@ -558,7 +558,7 @@ Do NOT output markdown tables or complex formatting. Keep it conversational.
 Use emojis sparingly.
 
 Data:
-Overall Attendance: ${dashboardData.overall_attendance?.toFixed(1)}%
+Overall Attendance: ${dashboardData.overall_attendance?.toFixed(2)}%
 Subjects:
 ${subjectSummaries}
 `;

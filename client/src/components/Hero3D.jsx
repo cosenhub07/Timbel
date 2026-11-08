@@ -326,11 +326,11 @@ export default function Hero3D({ onLoginClick, onDownloadClick }) {
   return (
     <section
       style={{
-        minHeight: "100vh",
+        minHeight: "calc(100vh - 174px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "100px 24px 60px",
+        padding: "40px 24px 60px",
         overflow: "hidden",
         position: "relative",
       }}
@@ -406,10 +406,10 @@ export default function Hero3D({ onLoginClick, onDownloadClick }) {
             margin: "0 0 36px",
             fontSize: "clamp(1rem, 1.8vw, 1.15rem)",
             lineHeight: 1.7,
-            color: "#f1f5f9", // Lighter color for better contrast
-            fontWeight: 500, // Slightly bolder
+            color: "#f1f5f9",
+            fontWeight: 500,
             maxWidth: 520,
-            textShadow: "0px 2px 4px rgba(0,0,0,0.3)" // Added subtle shadow for readability against complex backgrounds
+            textShadow: "0px 2px 4px rgba(0,0,0,0.3)"
           }}>
             Why wander the halls? Our system syncs with your live college schedule to instantly show you which classrooms are free right now, and which ones are about to fill up.
           </p>

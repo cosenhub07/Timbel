@@ -268,6 +268,7 @@ router.get('/rooms', async (req, res) => {
     let freeCount = 0;
     let busySoonCount = 0;
     let inUseCount = 0;
+    let concludedCount = 0;
 
     for (const [roomName, slots] of Object.entries(roomMap)) {
       // Sort slots by start_time
@@ -341,8 +342,17 @@ router.get('/rooms', async (req, res) => {
         }
       }
 
+      // Check if after college hours (6:00 PM = 18:00 = 1080 minutes)
+      const isAfterHours = queryMinutes >= 18 * 60;
+      if (isAfterHours) {
+        status = 'concluded';
+        currentClass = null;
+        nextClass = null;
+      }
+
       // Update counters
-      if (status === 'free') freeCount++;
+      if (status === 'concluded') concludedCount++;
+      else if (status === 'free') freeCount++;
       else if (status === 'busy-soon') busySoonCount++;
       else if (status === 'in-use') inUseCount++;
 
@@ -366,12 +376,16 @@ router.get('/rooms', async (req, res) => {
     // Sort rooms by name
     rooms.sort((a, b) => a.name.localeCompare(b.name));
 
+    const isAfterHours = queryMinutes >= 18 * 60;
+
     return res.json({
       rooms,
       summary: {
-        free: freeCount,
-        busySoon: busySoonCount,
-        inUse: inUseCount,
+        free: isAfterHours ? 0 : freeCount,
+        busySoon: isAfterHours ? 0 : busySoonCount,
+        inUse: isAfterHours ? 0 : inUseCount,
+        concluded: isAfterHours ? rooms.length : 0,
+        isAfterHours,
       },
     });
   } catch (err) {
@@ -714,6 +728,13 @@ router.get('/teachers/:name/status', async (req, res) => {
       }
     }
 
+    const isAfterHours = queryMinutes >= 18 * 60;
+    if (isAfterHours) {
+      status = 'concluded';
+      currentClass = null;
+      nextClass = null;
+    }
+
     return res.json({
       teacher: name,
       day,
@@ -722,6 +743,7 @@ router.get('/teachers/:name/status', async (req, res) => {
       currentClass,
       nextClass,
       todaySchedule,
+      isAfterHours,
     });
   } catch (err) {
     console.error('Teacher status error:', err);

@@ -6,7 +6,7 @@ import {
   Ban, PlusCircle, Zap, Sparkles, Target
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import QuantumBackground from '../components/QuantumBackground'
+import Prism from '../components/Prism'
 import LottieLib from 'lottie-react'
 import loaderAnimation from '../assets/loder.json'
 import assistantAnimation from '../assets/assistent.json'
@@ -37,8 +37,8 @@ function calcStats(record, overrideTarget = null) {
   const reqPct = target / 100
   const num = reqPct * totalCounted - present
   const den = 1 - reqPct
-  const requiredToAttend = num > 0 ? Math.ceil(num / den) : 0
-  const maxAbs = Math.floor(present / reqPct - totalCounted)
+  const requiredToAttend = num > 1e-9 ? Math.ceil(num / den) : 0
+  const maxAbs = Math.floor((present / reqPct) - totalCounted + 1e-9)
   const safeBunks = maxAbs > 0 ? maxAbs : 0
   let status = 'SAFE'
   if (requiredToAttend > 0) status = 'DANGER'
@@ -120,6 +120,8 @@ function CircleProgress({ pct, status }) {
   const circ = 2 * Math.PI * radius
   const offset = circ - (Math.min(pct, 100) / 100) * circ
   const color = status === 'DANGER' ? '#EF4444' : status === 'WARNING' ? '#F59E0B' : '#10B981'
+  const val = typeof pct === 'number' ? pct : Number(pct || 0)
+  const formatted = val.toFixed(2)
   return (
     <svg width="90" height="90" viewBox="0 0 90 90" className="flex-shrink-0">
       <circle cx="45" cy="45" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
@@ -129,8 +131,15 @@ function CircleProgress({ pct, status }) {
         strokeLinecap="round"
         style={{ transition: 'stroke-dashoffset 0.8s ease', transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }}
       />
-      <text x="45" y="49" textAnchor="middle" fontSize="14" fontWeight="700" fill={color}>
-        {pct.toFixed(0)}%
+      <text
+        x="45"
+        y="49"
+        textAnchor="middle"
+        fontSize={formatted.length >= 6 ? "11.5" : "12.5"}
+        fontWeight="700"
+        fill={color}
+      >
+        {formatted}%
       </text>
     </svg>
   )
@@ -273,6 +282,11 @@ function SubjectInputCard({ subject, data, onChange, onRemove }) {
           </h3>
           <div className="mt-1.5 flex items-center gap-2">
             <SessionTypeBadge type={subject.session_type} subject={subject.subject} />
+            {((data.present || 0) + (data.absent || 0)) > 0 && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold font-mono bg-slate-deep border border-slate-border/80 text-violet-primary" title="Current ERP Attendance Percentage">
+                {(((data.present || 0) / ((data.present || 0) + (data.absent || 0))) * 100).toFixed(2)}%
+              </span>
+            )}
           </div>
         </div>
         <button
@@ -457,7 +471,7 @@ function SubjectDashCard({ record, targetCriteria }) {
             <div>
               <span>If you miss next <strong>{simMiss}</strong> {simMiss === 1 ? 'class' : 'classes'}:</span>
               <div className="font-bold text-sm mt-0.5 flex items-center gap-2">
-                <span>{stats.currentPct.toFixed(1)}% ➔ {simPct.toFixed(1)}%</span>
+                <span>{stats.currentPct.toFixed(2)}% ➔ {simPct.toFixed(2)}%</span>
                 <span className="text-xs font-normal opacity-80">
                   ({simStatus === 'DANGER' ? '🚨 Drops below mandatory threshold!' : `Leaves ${simBufferRemaining} buffer classes`})
                 </span>
@@ -498,10 +512,10 @@ function SubjectDashCard({ record, targetCriteria }) {
             <div className="bg-amber-soon/5 border border-amber-soon/20 rounded-xl p-3">
               <p className="text-xs text-amber-soon font-semibold mb-1">⏳ Pending Attendance Range</p>
               <p className="text-xs text-text-muted">
-                If all {stats.pending} pending → <strong className="text-emerald-free">Present</strong>: {stats.bestCase.toFixed(1)}%
+                If all {stats.pending} pending → <strong className="text-emerald-free">Present</strong>: {stats.bestCase.toFixed(2)}%
               </p>
               <p className="text-xs text-text-muted">
-                If all {stats.pending} pending → <strong className="text-red-busy">Absent</strong>: {stats.worstCase.toFixed(1)}%
+                If all {stats.pending} pending → <strong className="text-red-busy">Absent</strong>: {stats.worstCase.toFixed(2)}%
               </p>
             </div>
           )}
@@ -614,7 +628,7 @@ function DailyOutlookCard({ subjects, targetCriteria }) {
               {verdict === 'NO_CLASSES' && 'No Timetable Slots Detected For Today'}
             </h4>
             <p className="text-xs text-text-muted mt-0.5 max-w-xl leading-relaxed">
-              {verdict === 'DANGER' && 'You have class in a subject where attendance is below 75%. Attending today is essential to protect exam eligibility.'}
+              {verdict === 'DANGER' && `You have class in a subject where attendance is below ${targetCriteria || 75}%. Attending today is essential to protect exam eligibility.`}
               {verdict === 'WARNING' && 'You have classes with 2 or fewer buffer lectures remaining. Missing today may push you into detention risk.'}
               {verdict === 'SAFE' && 'All subjects scheduled for today have a comfortable attendance cushion. If you have personal matters or an emergency, leave is feasible.'}
               {verdict === 'NO_CLASSES' && 'No scheduled classes today according to your weekly timetable. Enjoy the break or catch up on revisions!'}
@@ -1175,23 +1189,75 @@ export default function AttendancePlannerPage() {
 
   return (
     <div className="min-h-screen pb-24 relative overflow-x-hidden bg-transparent">
-      <QuantumBackground />
-      <div className="fixed inset-0 bg-slate-darker/50 z-0 pointer-events-none" />
+      {/* ── React Bits Prism Background Effect ── */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-60">
+        <Prism
+          animationType="rotate"
+          timeScale={0.4}
+          height={3.5}
+          baseWidth={5.5}
+          scale={3.6}
+          hueShift={0}
+          colorFrequency={1}
+          noise={0.25}
+          glow={1.2}
+          transparent={true}
+          bloom={1.2}
+          suspendWhenOffscreen={false}
+        />
+      </div>
+      <div className="fixed inset-0 bg-slate-darker/60 z-0 pointer-events-none" />
       <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-violet-primary/15 rounded-full blur-[120px] pointer-events-none z-0" />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-16 relative z-10">
 
         {/* ── Hero Header ──────────────────────────────────────────────────── */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-primary/10 border border-violet-primary/30 text-violet-primary text-xs font-bold tracking-wider uppercase mb-4">
-            <BarChart2 size={12} /> Smart Attendance Planner
+        <div className="relative text-center mb-12 select-none">
+          {/* Ambient Glow Aura */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[520px] h-[150px] bg-gradient-to-r from-violet-600/20 via-fuchsia-600/15 to-emerald-500/20 rounded-full blur-[60px] pointer-events-none -z-10" />
+
+          {/* Glowing Glass Pill */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-card/80 border border-violet-primary/35 text-xs font-semibold tracking-wider uppercase mb-5 backdrop-blur-xl shadow-[0_0_25px_rgba(99,91,255,0.2)] hover:border-violet-primary/60 transition-all duration-300 group">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <Sparkles size={13} className="text-violet-400 group-hover:rotate-12 transition-transform duration-300" />
+            <span className="bg-gradient-to-r from-violet-300 via-fuchsia-200 to-emerald-300 bg-clip-text text-transparent font-bold">
+              Smart Attendance Intelligence
+            </span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-heading font-extrabold text-text-primary mb-3">
-            Know Your <span className="gradient-text">Attendance</span>
+
+          {/* Main Headline */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-heading font-black tracking-tight text-text-primary mb-3.5 leading-[1.15]">
+            Know Your{' '}
+            <span className="relative inline-block">
+              <span className="bg-gradient-to-r from-violet-400 via-fuchsia-300 to-emerald-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(99,91,255,0.45)]">
+                Attendance
+              </span>
+              <span className="absolute -bottom-1 left-0 right-0 h-[3px] bg-gradient-to-r from-violet-500/0 via-violet-400 to-emerald-400/0 rounded-full blur-[0.5px]" />
+            </span>
           </h1>
-          <p className="text-text-muted text-base max-w-lg mx-auto leading-relaxed">
-            Don't just know your percentage — know what to do about it. Enter your ERP attendance and we'll tell you exactly how many lectures to attend or safely skip.
+
+          {/* Engaging Subtitle */}
+          <p className="text-text-secondary text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+            Don’t just stare at numbers. Calculate your exact{' '}
+            <span className="text-emerald-free font-semibold">safe skip buffer</span>, plan ahead with your timetable, and stay{' '}
+            <span className="text-violet-hover font-semibold">100% exam-eligible</span>.
           </p>
+
+          {/* Quick Feature Badges */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mt-5">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-slate-deep/80 border border-slate-border/80 text-text-muted backdrop-blur-md shadow-sm">
+              <ShieldCheck size={12} className="text-emerald-free" /> Safe Bunk Buffer
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-slate-deep/80 border border-slate-border/80 text-text-muted backdrop-blur-md shadow-sm">
+              <CalendarDays size={12} className="text-violet-hover" /> Live Timetable Sync
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-slate-deep/80 border border-slate-border/80 text-text-muted backdrop-blur-md shadow-sm">
+              <Zap size={12} className="text-amber-soon" /> Zero Detention Risk
+            </span>
+          </div>
         </div>
 
         {/* ── Step Indicator ──────────────────────────────────────────────── */}
@@ -1390,7 +1456,7 @@ export default function AttendancePlannerPage() {
               <div className="text-center sm:text-left flex-1">
                 <p className="text-xs font-bold tracking-widest text-violet-primary uppercase mb-1">Overall Attendance</p>
                 <div className="text-6xl font-extrabold gradient-text mb-1">
-                  {dashboardData.overall_attendance.toFixed(1)}%
+                  {dashboardData.overall_attendance.toFixed(2)}%
                 </div>
                 <p className="text-text-muted text-sm">Target Criteria: <strong className="text-violet-primary font-bold">{targetCriteria}%</strong></p>
               </div>

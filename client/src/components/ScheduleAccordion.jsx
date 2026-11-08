@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ChevronDown, ChevronUp, BookOpen, User, Users, AlertTriangle } from 'lucide-react'
 import IssueReportModal from './IssueReportModal'
 
-export default function ScheduleAccordion({ schedule, queryTimeInMinutes, roomName }) {
+export default function ScheduleAccordion({ schedule, queryTimeInMinutes, roomName, isToday = true }) {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedSlotForIssue, setSelectedSlotForIssue] = useState(null)
 
@@ -33,11 +33,9 @@ export default function ScheduleAccordion({ schedule, queryTimeInMinutes, roomNa
             const startMin = timeToMinutes(slot.start_time)
             const endMin = timeToMinutes(slot.end_time)
             
-            // Highlight the currently active slot
-            const isActive = queryTimeInMinutes >= startMin && queryTimeInMinutes < endMin
-            
-            // Highlight past slots
-            const isPast = queryTimeInMinutes >= endMin
+            // Highlight active/past slots only when viewing today
+            const isActive = isToday && queryTimeInMinutes !== null && queryTimeInMinutes >= startMin && queryTimeInMinutes < endMin
+            const isPast = isToday && queryTimeInMinutes !== null && queryTimeInMinutes >= endMin
 
             return (
               <div 

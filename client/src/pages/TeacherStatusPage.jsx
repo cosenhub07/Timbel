@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Users, Search, Clock, MapPin, BookOpen, AlertCircle } from 'lucide-react'
+import { Users, Search, Clock, MapPin, BookOpen, AlertCircle, Calendar, Moon } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import LottieLib from 'lottie-react'
 import loaderAnimation from '../assets/loder.json'
@@ -104,6 +104,20 @@ export default function TeacherStatusPage() {
     setSearchTerm(teacher)
     setIsDropdownOpen(false)
   }
+
+  const DAY_FULL_NAMES = {
+    MON: 'Monday',
+    TUE: 'Tuesday',
+    WED: 'Wednesday',
+    THU: 'Thursday',
+    FRI: 'Friday',
+    SAT: 'Saturday',
+    SUN: 'Sunday'
+  }
+
+  const todayDay = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][new Date().getDay()]
+  const isToday = selectedDay === todayDay
+  const dayFullName = DAY_FULL_NAMES[selectedDay] || selectedDay
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-slate-darker pb-20">
@@ -250,69 +264,114 @@ export default function TeacherStatusPage() {
             
             {/* Big Status Banner (Hide on Sunday) */}
             {selectedDay !== 'SUN' && (
-              <div className={`p-8 rounded-2xl border backdrop-blur-md relative overflow-hidden transition-all ${
-                teacherData.status === 'free' ? 'bg-emerald-free/10 border-emerald-free/30' :
-                teacherData.status === 'in-lecture' ? 'bg-red-busy/10 border-red-busy/30' :
-                'bg-amber-soon/10 border-amber-soon/30'
-              }`}>
-              
-              <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
-                {/* Status Icon Indicator */}
-                <div className={`w-20 h-20 shrink-0 rounded-full flex items-center justify-center border-4 ${
-                  teacherData.status === 'free' ? 'bg-emerald-free/20 border-emerald-free text-emerald-free' :
-                  teacherData.status === 'in-lecture' ? 'bg-red-busy/20 border-red-busy text-red-busy' :
-                  'bg-amber-soon/20 border-amber-soon text-amber-soon'
+              !isToday ? (
+                /* Non-current Day: Show clean schedule banner without live claims */
+                <div className="p-6 md:p-8 rounded-2xl border backdrop-blur-md bg-violet-primary/10 border-violet-primary/30">
+                  <div className="flex flex-col md:flex-row items-center gap-6">
+                    <div className="w-16 h-16 shrink-0 rounded-2xl flex items-center justify-center bg-violet-primary/20 border border-violet-primary/40 text-violet-primary">
+                      <Calendar className="w-8 h-8" />
+                    </div>
+                    <div className="text-center md:text-left flex-1">
+                      <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                        <span className="text-xs font-bold uppercase tracking-wider text-violet-primary">
+                          {dayFullName} Timetable
+                        </span>
+                      </div>
+                      <h2 className="text-2xl md:text-3xl font-bold font-heading text-text-primary mb-1">
+                        {teacherData.teacher}
+                      </h2>
+                      <p className="text-text-muted text-sm">
+                        {teacherData.todaySchedule?.length > 0 
+                          ? `${teacherData.todaySchedule.length} ${teacherData.todaySchedule.length === 1 ? 'lecture' : 'lectures'} scheduled on ${dayFullName}`
+                          : `No lectures scheduled on ${dayFullName}`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : teacherData.status === 'concluded' ? (
+                /* Today after 6:00 PM: College hours concluded */
+                <div className="p-8 rounded-2xl border backdrop-blur-md bg-indigo-500/10 border-indigo-500/30">
+                  <div className="flex flex-col md:flex-row items-center gap-6">
+                    <div className="w-20 h-20 shrink-0 rounded-full flex items-center justify-center border-4 bg-indigo-500/20 border-indigo-500 text-indigo-300">
+                      <Moon className="w-8 h-8" />
+                    </div>
+                    <div className="text-center md:text-left flex-1">
+                      <h2 className="text-2xl md:text-3xl font-bold font-heading text-text-primary mb-2">
+                        {teacherData.teacher}
+                      </h2>
+                      <div className="text-indigo-300 font-medium text-lg">
+                        College Hours Concluded. Lectures ended at 6:00 PM.
+                      </div>
+                      <p className="text-xs text-text-muted mt-1">
+                        Check tomorrow's schedule below or explore SendiYou!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Today during college hours: Live Status */
+                <div className={`p-8 rounded-2xl border backdrop-blur-md relative overflow-hidden transition-all ${
+                  teacherData.status === 'free' ? 'bg-emerald-free/10 border-emerald-free/30' :
+                  teacherData.status === 'in-lecture' ? 'bg-red-busy/10 border-red-busy/30' :
+                  'bg-amber-soon/10 border-amber-soon/30'
                 }`}>
-                  {teacherData.status === 'free' && <Users className="w-8 h-8" />}
-                  {teacherData.status === 'in-lecture' && <BookOpen className="w-8 h-8" />}
-                  {teacherData.status === 'busy-soon' && <Clock className="w-8 h-8" />}
+                  <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+                    <div className={`w-20 h-20 shrink-0 rounded-full flex items-center justify-center border-4 ${
+                      teacherData.status === 'free' ? 'bg-emerald-free/20 border-emerald-free text-emerald-free' :
+                      teacherData.status === 'in-lecture' ? 'bg-red-busy/20 border-red-busy text-red-busy' :
+                      'bg-amber-soon/20 border-amber-soon text-amber-soon'
+                    }`}>
+                      {teacherData.status === 'free' && <Users className="w-8 h-8" />}
+                      {teacherData.status === 'in-lecture' && <BookOpen className="w-8 h-8" />}
+                      {teacherData.status === 'busy-soon' && <Clock className="w-8 h-8" />}
+                    </div>
+
+                    <div className="text-center md:text-left flex-1">
+                      <h2 className="text-2xl md:text-3xl font-bold font-heading text-text-primary mb-2">
+                        {teacherData.teacher}
+                      </h2>
+                      
+                      {teacherData.status === 'free' && (
+                        <div className="text-emerald-free font-medium text-lg">
+                          Currently Free. No ongoing classes right now.
+                        </div>
+                      )}
+
+                      {teacherData.status === 'busy-soon' && (
+                        <div className="text-amber-soon font-medium text-lg">
+                          Free right now, but heading to a lecture soon.
+                        </div>
+                      )}
+
+                      {teacherData.status === 'in-lecture' && teacherData.currentClass && (
+                        <div>
+                          <div className="text-red-busy font-bold text-xl mb-3 flex items-center justify-center md:justify-start gap-2">
+                            <div className="w-3 h-3 rounded-full bg-red-busy animate-pulse-soft" />
+                            Currently In Lecture
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 text-text-primary bg-slate-darker/50 p-4 rounded-xl border border-slate-border/50">
+                            <div>
+                              <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Subject</p>
+                              <p className="font-semibold">{teacherData.currentClass.subject}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Class</p>
+                              <p className="font-semibold">{teacherData.currentClass.class_code} {teacherData.currentClass.section}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-text-muted uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <MapPin size={14} /> Room
+                              </p>
+                              <p className="font-semibold text-violet-primary">Bldg {teacherData.currentClass.building}, {teacherData.currentClass.room}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-
-                <div className="text-center md:text-left flex-1">
-                  <h2 className="text-2xl md:text-3xl font-bold font-heading text-text-primary mb-2">
-                    {teacherData.teacher}
-                  </h2>
-                  
-                  {teacherData.status === 'free' && (
-                    <div className="text-emerald-free font-medium text-lg">
-                      Currently Free. No ongoing classes right now.
-                    </div>
-                  )}
-
-                  {teacherData.status === 'busy-soon' && (
-                    <div className="text-amber-soon font-medium text-lg">
-                      Free right now, but heading to a lecture soon.
-                    </div>
-                  )}
-
-                  {teacherData.status === 'in-lecture' && teacherData.currentClass && (
-                    <div>
-                      <div className="text-red-busy font-bold text-xl mb-3 flex items-center justify-center md:justify-start gap-2">
-                        <div className="w-3 h-3 rounded-full bg-red-busy animate-pulse-soft" />
-                        Currently In Lecture
-                      </div>
-                      <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 text-text-primary bg-slate-darker/50 p-4 rounded-xl border border-slate-border/50">
-                        <div>
-                          <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Subject</p>
-                          <p className="font-semibold">{teacherData.currentClass.subject}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Class</p>
-                          <p className="font-semibold">{teacherData.currentClass.class_code} {teacherData.currentClass.section}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-text-muted uppercase tracking-wider mb-1 flex items-center gap-1">
-                            <MapPin size={14} /> Room
-                          </p>
-                          <p className="font-semibold text-violet-primary">Bldg {teacherData.currentClass.building}, {teacherData.currentClass.room}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+              )
+            )}
             {/* Today's Schedule Timeline / Holiday State */}
             {selectedDay === 'SUN' ? (
               <div className="text-center py-16 bg-violet-primary/5 rounded-2xl border border-violet-primary/20 glass-card">
@@ -338,7 +397,7 @@ export default function TeacherStatusPage() {
                 {teacherData.todaySchedule && teacherData.todaySchedule.length > 0 ? (
                   <div className="space-y-4">
                     {teacherData.todaySchedule.map((slot, idx) => {
-                      const isCurrent = teacherData.currentClass && 
+                      const isCurrent = isToday && teacherData.currentClass && 
                         teacherData.currentClass.start_time === slot.start_time &&
                         teacherData.currentClass.room === slot.room;
                       

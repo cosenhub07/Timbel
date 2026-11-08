@@ -183,7 +183,7 @@ router.post('/ask', async (req, res) => {
           const present = record.present || 0;
           const absent = record.absent || 0;
           const total = present + absent;
-          const pct = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+          const pct = total > 0 ? ((present / total) * 100).toFixed(2) : '0.00';
           
           attendanceContext += `- ${subjName}: ${pct}% (Present: ${present}, Absent: ${absent}). Status: ${stats.status}. `;
           if (stats.safeBunks > 0) {

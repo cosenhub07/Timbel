@@ -1,4 +1,4 @@
-import { CheckCircle, Clock, XCircle } from 'lucide-react'
+import { CheckCircle, Clock, XCircle, Moon } from 'lucide-react'
 
 export default function StatusBadge({ status }) {
   let config = {
@@ -18,6 +18,12 @@ export default function StatusBadge({ status }) {
       colorClass: 'bg-red-busy/10 text-red-busy border-red-busy/20',
       icon: <XCircle size={14} />,
       label: 'In Use'
+    }
+  } else if (status === 'concluded') {
+    config = {
+      colorClass: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/25',
+      icon: <Moon size={14} />,
+      label: 'Day Ended'
     }
   }
 

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Cosen Launch Video</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&amp;family=Inter:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--v:#635BFF;--g:#10B981;--bg:#060C20;--rose:#EC4899;--amber:#F59E0B;--red:#EF4444;--w:#F8FAFC;--m:#94A3B8;--dim:#475569;--fh:'Plus Jakarta Sans',sans-serif;--fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--w);font-family:var(--fb);-webkit-font-smoothing:antialiased}
+
+.stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.96);transition:opacity .9s cubic-bezier(.4,0,.2,1),transform .9s cubic-bezier(.4,0,.2,1);pointer-events:none;z-index:1}
+.stage.active{opacity:1;transform:scale(1);pointer-events:auto;z-index:10}
+.stage.exit{opacity:0;transform:scale(1.06)}
+
+.gt{background:linear-gradient(135deg,var(--v),var(--g));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gtp{background:linear-gradient(135deg,var(--rose),var(--v));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 16px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.glow{position:absolute;border-radius:50%;pointer-events:none;filter:blur(60px);opacity:.4}
+
+/* BOOT */
+#s0{flex-direction:column;gap:16px}
+.bt{font-family:var(--fm);font-size:14px;color:var(--g);opacity:0;animation:ti .5s ease forwards}
+.bt:nth-child(1){animation-delay:.3s}.bt:nth-child(2){animation-delay:.8s}.bt:nth-child(3){animation-delay:1.3s}.bt:nth-child(4){animation-delay:1.8s}.bt:nth-child(5){animation-delay:2.3s;color:var(--v);font-weight:600}
+@keyframes ti{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+
+/* LOGO */
+#s1{flex-direction:column;gap:24px;position:relative}
+.lc{position:relative;display:flex;flex-direction:column;align-items:center;gap:20px}
+.lw{font-family:var(--fh);font-size:clamp(64px,10vw,130px);font-weight:900;letter-spacing:-.04em;line-height:1;opacity:0;animation:lr 1.4s cubic-bezier(.22,1,.36,1) .5s forwards}
+.lt{font-size:clamp(16px,2.5vw,24px);font-weight:400;color:var(--m);letter-spacing:-.01em;opacity:0;animation:fu .9s ease 1.6s forwards}
+.lg{width:500px;height:500px;background:radial-gradient(circle,rgba(99,91,255,.35)0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);animation:pg 3s ease-in-out infinite}
+@keyframes lr{0%{opacity:0;transform:scale(.6)translateY(30px);filter:blur(12px)}60%{opacity:1;transform:scale(1.03)translateY(-4px);filter:blur(0)}100%{opacity:1;transform:scale(1)translateY(0);filter:blur(0)}}
+@keyframes fu{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes pg{0%,100%{opacity:.3;transform:translate(-50%,-50%)scale(1)}50%{opacity:.5;transform:translate(-50%,-50%)scale(1.15)}}
+
+/* PROBLEM */
+#s2{flex-direction:column;gap:24px;text-align:center;padding:0 40px}
+.pp{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.ph{font-family:var(--fh);font-size:clamp(28px,5vw,56px);font-weight:800;line-height:1.12;letter-spacing:-.03em;max-width:900px;opacity:0;animation:fu .8s ease .4s forwards}
+.ps{font-size:clamp(14px,2vw,20px);color:var(--m);max-width:600px;line-height:1.6;opacity:0;animation:fu .7s ease .9s forwards}
+
+/* SOLUTION */
+#s3{flex-direction:column;gap:32px;text-align:center;padding:0 40px}
+.sp{background:rgba(99,91,255,.12);border:1px solid rgba(99,91,255,.3);color:var(--v)}
+.sh{font-family:var(--fh);font-size:clamp(32px,6vw,72px);font-weight:900;line-height:1.05;letter-spacing:-.035em;max-width:950px;opacity:0;animation:fu .9s ease .4s forwards}
+.sf{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fu .7s ease 1.2s forwards}
+.fc{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:14px;background:rgba(15,23,42,.8);border:1px solid rgba(99,91,255,.2);backdrop-filter:blur(12px);font-size:14px;font-weight:600;color:var(--w)}
+.fc .d{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+/* FEATURES */
+.fs{flex-direction:row;gap:clamp(40px,6vw,80px);padding:0 clamp(24px,5vw,80px);max-width:1300px;width:100%}
+.fl{flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px}
+.fr{flex:1;display:flex;align-items:center;justify-content:center;position:relative}
+.fn{font-family:var(--fh);font-size:120px;font-weight:900;line-height:1;opacity:.06;position:absolute;top:-60px;left:-20px}
+.flb{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;opacity:0;animation:fu .6s ease .3s forwards}
+.ft{font-family:var(--fh);font-size:clamp(26px,4vw,46px);font-weight:800;line-height:1.15;letter-spacing:-.02em;opacity:0;animation:fu .7s ease .5s forwards}
+.fd{font-size:clamp(14px,1.5vw,17px);color:var(--m);line-height:1.7;max-width:440px;opacity:0;animation:fu .7s ease .8s forwards}
+.fst{display:flex;gap:24px;margin-top:8px;opacity:0;animation:fu .6s ease 1.1s forwards}
+.sv{font-family:var(--fh);font-size:28px;font-weight:800}
+.sl{font-size:12px;color:var(--dim);margin-top:2px}
+
+.mc{width:100%;max-width:500px;background:linear-gradient(145deg,rgba(22,32,60,.97),rgba(12,18,40,.99));border:1px solid rgba(99,91,255,.2);border-radius:20px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.5),0 0 60px rgba(99,91,255,.08);opacity:0;animation:me .9s cubic-bezier(.22,1,.36,1) .6s forwards}
+@keyframes me{0%{opacity:0;transform:perspective(800px)rotateY(-12deg)translateX(40px)scale(.92)}100%{opacity:1;transform:perspective(800px)rotateY(-4deg)translateX(0)scale(1)}}
+.mb{padding:12px 16px;border-bottom:1px solid rgba(51,65,85,.4);display:flex;align-items:center;gap:10px;background:rgba(8,13,32,.85)}
+.md{display:flex;gap:5px}.mdt{width:8px;height:8px;border-radius:50%}
+.mu{flex:1;height:20px;border-radius:6px;background:rgba(30,41,59,.5);display:flex;align-items:center;justify-content:center}
+.mu span{font-family:var(--fm);font-size:10px;color:var(--dim)}
+.mbd{padding:20px}
+
+.rr{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(51,65,85,.2);opacity:0;animation:fu .4s ease forwards}
+.rr:nth-child(1){animation-delay:.8s}.rr:nth-child(2){animation-delay:1s}.rr:nth-child(3){animation-delay:1.2s}.rr:nth-child(4){animation-delay:1.4s}
+.rb{width:40px;height:40px;border-radius:10px;background:rgba(30,41,59,.8);border:1px solid rgba(51,65,85,.4);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--w);flex-shrink:0}
+.ri{flex:1}.rn{font-size:13px;font-weight:600;color:var(--w)}.rs{font-size:11px;color:var(--dim);margin-top:1px}
+.stp{padding:3px 10px;border-radius:999px;font-size:10px;font-weight:700;display:flex;align-items:center;gap:4px;flex-shrink:0}
+.stf{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:var(--g)}
+.stb{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.sts{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber)}
+
+.syc{padding:16px;background:rgba(236,72,153,.06);border:1px solid rgba(236,72,153,.15);border-radius:14px;margin-bottom:12px;opacity:0;animation:fu .5s ease forwards}
+.syc:nth-child(1){animation-delay:.9s}.syc:nth-child(2){animation-delay:1.2s}
+.sya{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+.arc{position:relative;width:180px;height:180px}
+.ar{width:100%;height:100%;transform:rotate(-90deg)}
+.arb{fill:none;stroke:rgba(51,65,85,.3);stroke-width:10}
+.arf{fill:none;stroke-width:10;stroke-linecap:round;stroke:url(#rg);stroke-dasharray:502;stroke-dashoffset:502;animation:rf 2s cubic-bezier(.4,0,.2,1) 1s forwards}
+@keyframes rf{to{stroke-dashoffset:126}}
+.arl{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.ap{font-family:var(--fh);font-size:38px;font-weight:900;opacity:0;animation:fu .6s ease 2s forwards}
+.asb{font-size:11px;color:var(--dim);margin-top:2px;opacity:0;animation:fu .5s ease 2.3s forwards}
+
+#s8{flex-direction:column;gap:40px;text-align:center}
+.sg{display:flex;gap:clamp(20px,4vw,48px);flex-wrap:wrap;justify-content:center}
+.sc{min-width:160px;padding:28px 24px;background:rgba(15,23,42,.7);border:1px solid rgba(99,91,255,.15);border-radius:18px;backdrop-filter:blur(16px);text-align:center;opacity:0;animation:spp .6s cubic-bezier(.22,1,.36,1) forwards}
+.sc:nth-child(1){animation-delay:.4s}.sc:nth-child(2){animation-delay:.6s}.sc:nth-child(3){animation-delay:.8s}.sc:nth-child(4){animation-delay:1s}
+@keyframes spp{0%{opacity:0;transform:scale(.8)translateY(20px)}100%{opacity:1;transform:scale(1)translateY(0)}}
+.sb{font-family:var(--fh);font-size:42px;font-weight:900}
+.sd{font-size:13px;color:var(--m);margin-top:6px}
+
+#s9{flex-direction:column;gap:28px;text-align:center;position:relative}
+.ch{font-family:var(--fh);font-size:clamp(36px,7vw,80px);font-weight:900;line-height:1.05;letter-spacing:-.035em;opacity:0;animation:lr 1.2s cubic-bezier(.22,1,.36,1) .4s forwards}
+.cs{font-size:clamp(15px,2vw,20px);color:var(--m);opacity:0;animation:fu .7s ease 1.2s forwards}
+.cb{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;background:var(--v);color:#fff;border-radius:999px;font-weight:700;font-size:18px;border:none;cursor:pointer;text-decoration:none;box-shadow:0 8px 30px rgba(99,91,255,.35);opacity:0;animation:fu .6s ease 1.8s forwards;transition:transform .2s,box-shadow .2s}
+.cb:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(99,91,255,.5)}
+.cu{font-family:var(--fm);font-size:16px;color:var(--dim);opacity:0;animation:fu .5s ease 2.3s forwards}
+
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+.pb{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--v),var(--g));z-index:100;transition:width .3s linear}
+.wm{position:fixed;bottom:20px;right:24px;font-family:var(--fm);font-size:11px;color:rgba(148,163,184,.25);z-index:50;letter-spacing:.05em}
+.rp{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:200;display:none;align-items:center;gap:8px;padding:12px 28px;border-radius:999px;background:rgba(15,23,42,.85);border:1px solid rgba(99,91,255,.4);color:var(--w);font-weight:700;font-size:14px;backdrop-filter:blur(12px);cursor:pointer;transition:all .25s}
+.rp:hover{background:rgba(99,91,255,.15);border-color:var(--v)}
+</style>
+</head>
+<body>
+<div class="pb" id="progress" style="width:0%"></div>
+<canvas id="particles"></canvas>
+<div class="wm">cosen.online</div>
+
+<div class="stage" id="s0">
+<div class="bt">$ initializing cosen-platform...</div>
+<div class="bt">[OK] Supabase connected</div>
+<div class="bt">[OK] 1,797 timetable slots loaded</div>
+<div class="bt">[OK] Campus modules ready</div>
+<div class="bt">Launching Cosen v1.0</div>
+</div>
+
+<div class="stage" id="s1">
+<div class="glow lg"></div>
+<div class="lc">
+<div class="lw gt">Cosen</div>
+<div class="lt">The Campus Super-App for Every Student Need.</div>
+</div>
+</div>
+
+<div class="stage" id="s2">
+<div class="pill pp" style="opacity:0;animation:fu .5s ease .1s forwards">THE PROBLEM</div>
+<h2 class="ph">Students waste <span style="color:var(--red)">hours</span> finding free rooms,<br>tracking teachers, and managing attendance.</h2>
+<p class="ps">Campus data is scattered across WhatsApp groups, notice boards, and outdated PDFs. Nobody knows which room is free right now.</p>
+</div>
+
+<div class="stage" id="s3">
+<div class="pill sp" style="opacity:0;animation:fu .5s ease .1s forwards">INTRODUCING</div>
+<h2 class="sh">One platform.<br><span class="gt">Everything campus.</span></h2>
+<div class="sf">
+<div class="fc"><span class="d" style="background:var(--g)"></span>Live Room Finder</div>
+<div class="fc"><span class="d" style="background:var(--v)"></span>Smart Timetables</div>
+<div class="fc"><span class="d" style="background:var(--rose)"></span>SendiYou</div>
+<div class="fc"><span class="d" style="background:var(--amber)"></span>Attendance Planner</div>
+<div class="fc"><span class="d" style="background:#00B2FF"></span>Teacher Tracker</div>
+<div class="fc"><span class="d" style="background:#A855F7"></span>AI Assistant</div>
+</div>
+</div>
+
+<div class="stage fs" id="s4">
+<div class="fl">
+<div class="fn" style="color:var(--g)">01</div>
+<div class="flb" style="color:var(--g)">CORE FEATURE</div>
+<h3 class="ft">Find a free room<br>in <span style="color:var(--g)">3 seconds.</span></h3>
+<p class="fd">Select your building, pick the day and time, and instantly see which classrooms are free, occupied, or about to get busy. Real-time. Zero guesswork.</p>
+<div class="fst">
+<div><div class="sv" style="color:var(--g)">1,797</div><div class="sl">Slots Tracked</div></div>
+<div><div class="sv" style="color:var(--v)">6</div><div class="sl">Campus Blocks</div></div>
+<div><div class="sv" style="color:var(--amber)">24/7</div><div class="sl">Live Status</div></div>
+</div>
+</div>
+<div class="fr">
+<div class="mc">
+<div class="mb"><div class="md"><div class="mdt" style="background:#EF4444"></div><div class="mdt" style="background:#F59E0B"></div><div class="mdt" style="background:#10B981"></div></div><div class="mu"><span>timetable-detector / finder</span></div><div style="font-size:9px;color:var(--g);font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)">LIVE</div></div>
+<div class="mbd">
+<div class="rr"><div class="rb">B006</div><div class="ri"><div class="rn">Discrete Structures</div><div class="rs">Ms. Geetanjali - 08:00-08:55</div></div><div class="stp stf">Free</div></div>
+<div class="rr"><div class="rb">NB201</div><div class="ri"><div class="rn">Data Structures Lab</div><div class="rs">Dr. Amit Shah - 08:55-09:50</div></div><div class="stp stb">In Use</div></div>
+<div class="rr"><div class="rb">A104</div><div class="ri"><div class="rn">Engineering Mathematics</div><div class="rs">Prof. Priya - 10:00-10:55</div></div><div class="stp sts">Busy Soon</div></div>
+<div class="rr"><div class="rb">D201</div><div class="ri"><div class="rn">Computer Networks</div><div class="rs">Dr. Sneha - 12:00-12:55</div></div><div class="stp stf">Free</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="stage fs" id="s5">
+<div class="fl">
+<div class="fn" style="color:var(--rose)">02</div>
+<div class="flb" style="color:var(--rose)">SOCIAL FEATURE</div>
+<h3 class="ft">Anonymous campus<br><span class="gtp">connections.</span></h3>
+<p class="fd">Post anonymously, find study partners, or shoot your shot. Gender preferences, identity control, and real-time group and 1-on-1 chats with zero judgment.</p>
+<div class="fst">
+<div><div class="sv" style="color:var(--rose)">SendiYou</div><div class="sl">Anonymous</div></div>
+<div><div class="sv" style="color:var(--v)">100%</div><div class="sl">Private</div></div>
+<div><div class="sv" style="color:var(--g)">Real-time</div><div class="sl">Chat System</div></div>
+</div>
+</div>
+<div class="fr">
+<div class="mc" style="border-color:rgba(236,72,153,.2);box-shadow:0 40px 80px rgba(0,0,0,.5),0 0 60px rgba(236,72,153,.06)">
+<div class="mb"><div class="md"><div class="mdt" style="background:#EF4444"></div><div class="mdt" style="background:#F59E0B"></div><div class="mdt" style="background:#10B981"></div></div><div class="mu"><span>cosen.online / sendiyou</span></div></div>
+<div class="mbd">
+<div class="syc"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="sya" style="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3)">F</div><div><div style="font-size:13px;font-weight:700;color:var(--w)">Mysterious Fox</div><div style="font-size:10px;color:var(--dim)">Anonymous - 2h ago</div></div></div><div style="font-size:12px;color:var(--m);line-height:1.5">Looking for someone from CS who loves late-night coding sessions and chai - no judgment, just good vibes</div></div>
+<div class="syc"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="sya" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3)">P</div><div><div style="font-size:13px;font-weight:700;color:var(--w)">Silent Petal</div><div style="font-size:10px;color:var(--dim)">Anonymous - 5h ago</div></div></div><div style="font-size:12px;color:var(--m);line-height:1.5">NB block ki library mein who was reading Atomic Habits? Let's be study buddies!</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="stage fs" id="s6">
+<div class="fl">
+<div class="fn" style="color:var(--amber)">03</div>
+<div class="flb" style="color:var(--amber)">SMART TOOL</div>
+<h3 class="ft">Bunk smart,<br><span style="color:var(--amber)">stay safe.</span></h3>
+<p class="fd">The AI-powered attendance planner calculates exactly how many classes you can skip while keeping your 75% safe. Subject-wise breakdown, risk alerts, and future projections.</p>
+<div class="fst">
+<div><div class="sv" style="color:var(--g)">75%</div><div class="sl">Target Threshold</div></div>
+<div><div class="sv" style="color:var(--amber)">AI</div><div class="sl">Powered</div></div>
+</div>
+</div>
+<div class="fr">
+<div style="display:flex;flex-direction:column;align-items:center;gap:20px;opacity:0;animation:fu .8s ease .6s forwards">
+<div class="arc">
+<svg class="ar" viewBox="0 0 180 180"><defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#635BFF"/><stop offset="100%" style="stop-color:#10B981"/></linearGradient></defs><circle class="arb" cx="90" cy="90" r="80"/><circle class="arf" cx="90" cy="90" r="80"/></svg>
+<div class="arl"><div class="ap gt">75%</div><div class="asb">Attendance Safe</div></div>
+</div>
+<div style="display:flex;gap:12px;opacity:0;animation:fu .5s ease 2.5s forwards">
+<div style="padding:8px 16px;border-radius:10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);font-size:12px;color:var(--g);font-weight:700">4 Bunks Left</div>
+<div style="padding:8px 16px;border-radius:10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);font-size:12px;color:var(--amber);font-weight:700">2 At Risk</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="stage fs" id="s7">
+<div class="fl">
+<div class="fn" style="color:var(--v)">04</div>
+<div class="flb" style="color:var(--v)">INTELLIGENCE</div>
+<h3 class="ft">AI-powered<br><span class="gt">campus brain.</span></h3>
+<p class="fd">Track any teacher's live location and schedule. Ask the AI assistant natural questions like "DDS5A ke kitne lectures hain?" and get instant, real-time database answers.</p>
+<div class="fst">
+<div><div class="sv" style="color:var(--v)">Gemini</div><div class="sl">AI Engine</div></div>
+<div><div class="sv" style="color:var(--g)">Live</div><div class="sl">DB Queries</div></div>
+<div><div class="sv" style="color:var(--amber)">Hinglish</div><div class="sl">Native Lang</div></div>
+</div>
+</div>
+<div class="fr">
+<div class="mc">
+<div class="mb"><div class="md"><div class="mdt" style="background:#EF4444"></div><div class="mdt" style="background:#F59E0B"></div><div class="mdt" style="background:#10B981"></div></div><div class="mu"><span>cosen.online / ai-assistant</span></div></div>
+<div class="mbd">
+<div style="display:flex;justify-content:flex-end;margin-bottom:12px;opacity:0;animation:fu .4s ease .9s forwards"><div style="padding:10px 14px;border-radius:14px 14px 4px 14px;background:rgba(99,91,255,.2);border:1px solid rgba(99,91,255,.3);max-width:70%;font-size:13px;color:var(--w)">Dr. Amit Shah abhi kahan hai?</div></div>
+<div style="display:flex;justify-content:flex-start;margin-bottom:12px;opacity:0;animation:fu .4s ease 1.3s forwards"><div style="padding:10px 14px;border-radius:14px 14px 14px 4px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);max-width:85%;font-size:13px;color:var(--w);line-height:1.6"><span style="font-weight:700;color:var(--g)">Cosen AI:</span><br>Dr. Amit Shah abhi <strong>NB201</strong> mein hain - <em>Data Structures</em> padha rahe hain (08:55-09:50). Next free slot <strong>10:00</strong> se hai!</div></div>
+<div style="display:flex;justify-content:flex-end;opacity:0;animation:fu .4s ease 1.7s forwards"><div style="padding:10px 14px;border-radius:14px 14px 4px 14px;background:rgba(99,91,255,.2);border:1px solid rgba(99,91,255,.3);max-width:70%;font-size:13px;color:var(--w)">Thanks! B006 free hai kya?</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="stage" id="s8">
+<div class="pill sp" style="opacity:0;animation:fu .5s ease .1s forwards">BY THE NUMBERS</div>
+<h2 style="font-family:var(--fh);font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-.03em;opacity:0;animation:fu .7s ease .2s forwards">Built for <span class="gt">real impact.</span></h2>
+<div class="sg">
+<div class="sc"><div class="sb gt" id="c1">0</div><div class="sd">Timetable Slots</div></div>
+<div class="sc"><div class="sb" style="color:var(--g)" id="c2">0</div><div class="sd">Campus Blocks</div></div>
+<div class="sc"><div class="sb" style="color:var(--rose)" id="c3">0</div><div class="sd">Anonymous Connections</div></div>
+<div class="sc"><div class="sb" style="color:var(--amber)">Infinite</div><div class="sd">Hours Saved</div></div>
+</div>
+</div>
+
+<div class="stage" id="s9">
+<div class="glow" style="width:600px;height:600px;background:radial-gradient(circle,rgba(99,91,255,.25)0%,transparent 60%);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+<div class="glow" style="width:400px;height:400px;background:radial-gradient(circle,rgba(16,185,129,.18)0%,transparent 60%);top:30%;left:65%;transform:translate(-50%,-50%)"></div>
+<h2 class="ch">Your campus.<br><span class="gt">Reimagined.</span></h2>
+<p class="cs">Join thousands of students already using Cosen.</p>
+<a href="https://cosen.online" class="cb" target="_blank">Get Started Free</a>
+<div class="cu">cosen.online</div>
+</div>
+
+<button class="rp" id="rBtn" onclick="replay()">Replay Video</button>
+
+<script>
+var cv=document.getElementById('particles'),cx=cv.getContext('2d'),pts=[];
+function rsz(){cv.width=innerWidth;cv.height=innerHeight}addEventListener('resize',rsz);rsz();
+function P(){this.r()}
+P.prototype.r=function(){this.x=Math.random()*cv.width;this.y=Math.random()*cv.height;this.s=Math.random()*2+.5;this.sx=(Math.random()-.5)*.3;this.sy=(Math.random()-.5)*.3;this.o=Math.random()*.4+.1;this.c=Math.random()>.5?'99,91,255':'16,185,129'};
+P.prototype.u=function(){this.x+=this.sx;this.y+=this.sy;if(this.x<0||this.x>cv.width)this.sx*=-1;if(this.y<0||this.y>cv.height)this.sy*=-1};
+P.prototype.d=function(){cx.beginPath();cx.arc(this.x,this.y,this.s,0,Math.PI*2);cx.fillStyle='rgba('+this.c+','+this.o+')';cx.fill()};
+for(var i=0;i<60;i++)pts.push(new P);
+function ap(){cx.clearRect(0,0,cv.width,cv.height);for(var i=0;i<pts.length;i++){pts[i].u();pts[i].d()}for(var i=0;i<pts.length;i++)for(var j=i+1;j<pts.length;j++){var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,dt=Math.sqrt(dx*dx+dy*dy);if(dt<140){cx.beginPath();cx.strokeStyle='rgba(99,91,255,'+(0.06*(1-dt/140))+')';cx.lineWidth=.5;cx.moveTo(pts[i].x,pts[i].y);cx.lineTo(pts[j].x,pts[j].y);cx.stroke()}}requestAnimationFrame(ap)}ap();
+
+var SC=[{id:'s0',d:4000},{id:'s1',d:5000},{id:'s2',d:5500},{id:'s3',d:5500},{id:'s4',d:6000},{id:'s5',d:6000},{id:'s6',d:6500},{id:'s7',d:6000},{id:'s8',d:5000},{id:'s9',d:7000}];
+var TD=0;for(var i=0;i<SC.length;i++)TD+=SC[i].d;
+var ci=-1,el=0,tm=null;
+
+function show(idx){if(ci>=0){var p=document.getElementById(SC[ci].id);p.classList.remove('active');p.classList.add('exit');setTimeout(function(){p.classList.remove('exit')},900)}ci=idx;if(idx>=SC.length){document.getElementById('rBtn').style.display='flex';return}var e=document.getElementById(SC[idx].id);e.classList.add('active');if(SC[idx].id==='s8')ac()}
+
+function run(){document.getElementById('rBtn').style.display='none';ci=-1;el=0;show(0);clearInterval(tm);var T=50;tm=setInterval(function(){el+=T;document.getElementById('progress').style.width=Math.min(100,el/TD*100)+'%';var a=0;for(var i=0;i<SC.length;i++){a+=SC[i].d;if(el>=a&&ci===i){show(i+1);break}}if(el>=TD)clearInterval(tm)},T)}
+
+function ac(){ani('c1',0,1797,2000);ani('c2',0,6,1500);ani('c3',0,342,2000)}
+function ani(id,s,e,d){var el=document.getElementById(id);if(!el)return;var st=performance.now();function step(n){var p=Math.min(1,(n-st)/d),ease=1-Math.pow(1-p,3);el.textContent=Math.round(s+(e-s)*ease).toLocaleString();if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
+
+function replay(){var stages=document.querySelectorAll('.stage');for(var i=0;i<stages.length;i++){stages[i].classList.remove('active','exit');var p=stages[i].parentNode,c=stages[i].cloneNode(true);p.replaceChild(c,stages[i])}setTimeout(run,200)}
+
+addEventListener('load',function(){setTimeout(run,500)});
+</script>
+</body>
+</html>

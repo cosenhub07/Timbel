@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, MapPin, AlertCircle } from 'lucide-react'
+import { Search, MapPin, AlertCircle, Calendar, Moon } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import LottieLib from 'lottie-react'
 import loaderAnimation from '../assets/loder.json'
@@ -107,6 +107,26 @@ export default function FinderPage() {
     return parseInt(h, 10) * 60 + parseInt(m, 10)
   }
 
+  const DAY_FULL_NAMES = {
+    MON: 'Monday',
+    TUE: 'Tuesday',
+    WED: 'Wednesday',
+    THU: 'Thursday',
+    FRI: 'Friday',
+    SAT: 'Saturday',
+    SUN: 'Sunday'
+  }
+
+  const todayDay = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][new Date().getDay()]
+  const isToday = selectedDay === todayDay
+  const currentMinutes = queryTimeInMinutes()
+  const isAfterHours = isToday && currentMinutes >= 18 * 60
+  const dayFullName = DAY_FULL_NAMES[selectedDay] || selectedDay
+
+  const activeRoomsCount = roomsData?.rooms?.filter(r => r.fullSchedule && r.fullSchedule.length > 0).length || 0
+  const emptyRoomsCount = (roomsData?.rooms?.length || 0) - activeRoomsCount
+  const totalLecturesCount = roomsData?.rooms?.reduce((sum, r) => sum + (r.fullSchedule?.length || 0), 0) || 0
+
   return (
     <div className="min-h-screen pt-24 px-4 pb-16">
       <div className="max-w-7xl mx-auto">
@@ -145,11 +165,19 @@ export default function FinderPage() {
                       selectedBuilding={selectedBuilding} 
                       onSelect={setSelectedBuilding} 
                     />
-                    <TimeSelector 
-                      selectedTime={selectedTime}
-                      onSelect={setSelectedTime}
-                      onSyncNow={syncCurrentTime}
-                    />
+                    <div className="flex flex-col">
+                      <TimeSelector 
+                        selectedTime={selectedTime}
+                        onSelect={setSelectedTime}
+                        onSyncNow={syncCurrentTime}
+                      />
+                      {!isToday && (
+                        <p className="text-[11px] text-text-muted mt-1.5 font-medium flex items-center gap-1">
+                          <Calendar size={11} className="text-violet-primary" />
+                          Showing full day timetable for {dayFullName}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -181,22 +209,67 @@ export default function FinderPage() {
                       Building {selectedBuilding} Rooms
                     </h2>
                     
-                    <div className="flex items-center gap-4 text-sm font-medium bg-slate-darker border border-slate-border px-4 py-2 rounded-xl">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-free" />
-                        <span className="text-text-primary">{roomsData.summary.free} Free</span>
+                    {/* CASE A: Today during college hours (< 18:00) */}
+                    {isToday && !isAfterHours && (
+                      <div className="flex items-center gap-4 text-sm font-medium bg-slate-darker border border-slate-border px-4 py-2 rounded-xl shadow-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                          </span>
+                          <span className="text-emerald-400 font-bold text-xs uppercase tracking-wider">Live</span>
+                        </div>
+                        <div className="w-px h-4 bg-slate-border" />
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-emerald-free" />
+                          <span className="text-text-primary">{roomsData.summary?.free || 0} Free</span>
+                        </div>
+                        <div className="w-px h-4 bg-slate-border" />
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-amber-soon" />
+                          <span className="text-text-primary">{roomsData.summary?.busySoon || 0} Busy Soon</span>
+                        </div>
+                        <div className="w-px h-4 bg-slate-border" />
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-red-busy" />
+                          <span className="text-text-primary">{roomsData.summary?.inUse || 0} In Use</span>
+                        </div>
                       </div>
-                      <div className="w-px h-4 bg-slate-border" />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-amber-soon" />
-                        <span className="text-text-primary">{roomsData.summary.busySoon} Busy Soon</span>
+                    )}
+
+                    {/* CASE B: Today after college hours (>= 18:00) */}
+                    {isToday && isAfterHours && (
+                      <div className="flex items-center gap-3 text-sm font-medium bg-slate-darker border border-indigo-500/30 px-4 py-2 rounded-xl text-text-muted shadow-sm">
+                        <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-wider">
+                          <Moon size={14} className="text-indigo-400" />
+                          <span>Day Ended</span>
+                        </div>
+                        <div className="w-px h-4 bg-slate-border" />
+                        <span className="text-text-secondary text-xs">
+                          College hours ended at 6:00 PM • No active classes right now
+                        </span>
                       </div>
-                      <div className="w-px h-4 bg-slate-border" />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-red-busy" />
-                        <span className="text-text-primary">{roomsData.summary.inUse} In Use</span>
+                    )}
+
+                    {/* CASE C: Other Days (Non-current day schedule overview) */}
+                    {!isToday && (
+                      <div className="flex flex-wrap items-center gap-3 text-sm font-medium bg-slate-darker border border-violet-primary/30 px-4 py-2 rounded-xl shadow-sm">
+                        <div className="flex items-center gap-1.5 text-violet-primary font-bold text-xs uppercase tracking-wider">
+                          <Calendar size={13} />
+                          <span>{dayFullName} Schedule</span>
+                        </div>
+                        <div className="w-px h-4 bg-slate-border hidden sm:block" />
+                        <div className="flex items-center gap-2 text-xs font-semibold">
+                          <span className="text-text-primary font-bold">{activeRoomsCount}</span>
+                          <span className="text-text-muted">Rooms in Use ({totalLecturesCount} Lectures)</span>
+                        </div>
+                        <div className="w-px h-4 bg-slate-border hidden sm:block" />
+                        <div className="flex items-center gap-2 text-xs font-semibold">
+                          <span className="text-emerald-free font-bold">{emptyRoomsCount}</span>
+                          <span className="text-text-muted">Vacant All Day</span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 )}
 
@@ -231,6 +304,8 @@ export default function FinderPage() {
                           key={room.name} 
                           room={room} 
                           queryTimeInMinutes={queryTimeInMinutes()} 
+                          isToday={isToday}
+                          selectedDay={selectedDay}
                         />
                       ))}
                     </div>
