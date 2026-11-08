@@ -69,11 +69,19 @@ export default function TeacherStatusPage() {
     const now = new Date()
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
     let currentDay = days[now.getDay()]
+    if (currentDay === 'SUN') {
+      currentDay = 'MON'
+    }
     setSelectedDay(currentDay)
 
-    const hours = String(now.getHours()).padStart(2, '0')
-    const minutes = String(now.getMinutes()).padStart(2, '0')
-    setSelectedTime(`${hours}:${minutes}`)
+    const hoursNum = now.getHours()
+    if (hoursNum < 8 || hoursNum >= 17) {
+      setSelectedTime('10:00')
+    } else {
+      const hours = String(hoursNum).padStart(2, '0')
+      const minutes = String(now.getMinutes()).padStart(2, '0')
+      setSelectedTime(`${hours}:${minutes}`)
+    }
   }
 
   const fetchTeacherStatus = async () => {

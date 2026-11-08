@@ -73,12 +73,20 @@ export default function FinderPage() {
     // Set Day (MON-SAT, fallback to MON if Sunday)
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
     let currentDay = days[now.getDay()]
+    if (currentDay === 'SUN') {
+      currentDay = 'MON'
+    }
     setSelectedDay(currentDay)
 
-    // Set Time (HH:MM)
-    const hours = String(now.getHours()).padStart(2, '0')
-    const minutes = String(now.getMinutes()).padStart(2, '0')
-    setSelectedTime(`${hours}:${minutes}`)
+    // Set Time (HH:MM) - if outside college hours (08:00 - 17:00), default to 10:00 AM for preview
+    const hoursNum = now.getHours()
+    if (hoursNum < 8 || hoursNum >= 17) {
+      setSelectedTime('10:00')
+    } else {
+      const hours = String(hoursNum).padStart(2, '0')
+      const minutes = String(now.getMinutes()).padStart(2, '0')
+      setSelectedTime(`${hours}:${minutes}`)
+    }
   }
 
   const fetchRooms = async () => {
